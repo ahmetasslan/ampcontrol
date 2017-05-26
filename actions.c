@@ -189,6 +189,25 @@ uint8_t getAction(void)
 	return action;
 }
 
+static void setExtPower(uint8_t input)
+{
+	uint8_t offMask = 0b11111111;	// By default switch off all devices
+
+	offMask &= ~(1 << input);	// Don't off one of devices
+
+	if (offMask & 0b001)
+		PORT(EXT_POWER1) &= ~EXT_POWER1_LINE;
+	else
+		PORT(EXT_POWER1) |= EXT_POWER1_LINE;
+	if (offMask & 0b010)
+		PORT(EXT_POWER2) &= ~EXT_POWER2_LINE;
+	else
+		PORT(EXT_POWER2) |= EXT_POWER2_LINE;
+	if (offMask & 0b100)
+		PORT(EXT_POWER3) &= ~EXT_POWER3_LINE;
+	else
+		PORT(EXT_POWER3) |= EXT_POWER3_LINE;
+}
 
 void handleAction(uint8_t action)
 {
@@ -198,7 +217,7 @@ void handleAction(uint8_t action)
 	case ACTION_EXIT_STANDBY:
 		PORT(STMU_STBY) |= STMU_STBY_LINE;	/* Power up audio and tuner */
 		setWorkBrightness();
-
+		setExtPower(aproc.input);
 		setInitTimer(INIT_TIMER_START);
 
 		dispMode = MODE_SND_GAIN0 + aproc.input;
@@ -218,6 +237,7 @@ void handleAction(uint8_t action)
 	case CMD_RC_STBY:
 		sndSetMute(1);
 		sndPowerOff();
+		setExtPower(7);
 		tunerPowerOff();
 		displayPowerOff();
 
@@ -340,6 +360,7 @@ void handleAction(uint8_t action)
 	case CMD_RC_IN_2:
 	case CMD_RC_IN_3:
 	case CMD_RC_IN_4:
+		setExtPower(action - CMD_RC_IN_0);
 		sndSetInput(action - CMD_RC_IN_0);
 		dispMode = MODE_SND_GAIN0 + aproc.input;
 		setDisplayTime(DISPLAY_TIME_GAIN);

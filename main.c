@@ -45,6 +45,11 @@ static void hwInit(void)
 
 	setStbyTimer(0);
 
+	// Set power switches as outputs
+	DDR(EXT_POWER1) |= EXT_POWER1_LINE;
+	DDR(EXT_POWER2) |= EXT_POWER2_LINE;
+	DDR(EXT_POWER3) |= EXT_POWER3_LINE;
+
 	return;
 }
 

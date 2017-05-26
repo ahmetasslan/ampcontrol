@@ -69,6 +69,14 @@
 #define KS0066_E			DISP_STROB
 #define KS0066_E_LINE		DISP_STROB_LINE
 
+/* External power pins */
+#define EXT_POWER1			A
+#define EXT_POWER1_LINE		(1<<5)
+#define EXT_POWER2			A
+#define EXT_POWER2_LINE		(1<<6)
+#define EXT_POWER3			A
+#define EXT_POWER3_LINE		(1<<7)
+
 /* KS0066 Backlight port */
 #define KS0066_BCKL			DISP_BCKL
 #define KS0066_BCKL_LINE	DISP_BCKL_LINE
