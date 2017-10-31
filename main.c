@@ -10,6 +10,7 @@
 #include "display.h"
 #include "tuner/tuner.h"
 #include "actions.h"
+#include "pins.h"
 
 // Hardware initialization
 static void hwInit(void)

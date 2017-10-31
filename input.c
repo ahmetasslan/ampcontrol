@@ -5,6 +5,7 @@
 
 #include "eeprom.h"
 #include "pins.h"
+#include "display/gdfb.h"
 
 static volatile int8_t encCnt;
 static volatile cmdID cmdBuf;
