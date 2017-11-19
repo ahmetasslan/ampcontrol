@@ -564,10 +564,14 @@ void showRadio(uint8_t tune)
 	} else {
 		gdSetXY(110, 56);
 #ifdef _RDS
-		if (rdsFlag)
-			writeStringPgm(STR_RDS);
-		else
+		if (tuner.rds) {
+			if (rdsFlag)
+				writeStringPgm(STR_RDS);
+			else
+				writeStringPgm(STR_RC_NONE);
+		} else {
 			writeStringPgm(STR_SPACE3);
+		}
 #else
 		writeStringPgm(STR_SPACE3);
 #endif

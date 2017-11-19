@@ -5,8 +5,6 @@ audio/audio.c
 audio/audio.h
 audio/pt232x.c
 audio/pt232x.h
-audio/rda580xaudio.c
-audio/rda580xaudio.h
 audio/tda731x.c
 audio/tda731x.h
 audio/tda7439.c
