@@ -171,8 +171,8 @@ static void showBar(int16_t min, int16_t max, int16_t value)
 			color = 0x01;
 		}
 		if (!(i & 0x01)) {
-			for (j = 28; j < 39; j++) {
-				if (j == 33) {
+			for (j = 27; j < 38; j++) {
+				if (j == 32) {
 					gdDrawPixel(i, j, 1);
 				} else {
 					gdDrawPixel(i, j, color);
@@ -523,8 +523,6 @@ void showRadio(uint8_t tune)
 		writeStringPgm(STR_SPACE2);
 
 	/* Favourite station number */
-	gdSetXY(114, 23);
-	gdWriteChar(0xF5);						/* Heart symbol */
 	gdSetXY(122, 23);
 	if (favNum)
 		writeNum(favNum - 1, 1, ' ', 10);
