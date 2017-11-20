@@ -78,14 +78,20 @@ flash: $(ELF)
 fuse:
 	$(AVRDUDE) $(AD_CMDLINE) -U lfuse:w:0xff:m -U hfuse:w:0xd1:m -U efuse:w:0xfc:m
 
+eeprom_by:
+	$(AVRDUDE) $(AD_CMDLINE) -U eeprom:w:eeprom/eeprom_by.bin:r
+
+eeprom_bg:
+	$(AVRDUDE) $(AD_CMDLINE) -U eeprom:w:eeprom/eeprom_bg.bin:r
+
 eeprom_en:
 	$(AVRDUDE) $(AD_CMDLINE) -U eeprom:w:eeprom/eeprom_en.bin:r
 
+eeprom_fr:
+	$(AVRDUDE) $(AD_CMDLINE) -U eeprom:w:eeprom/eeprom_fr.bin:r
+
 eeprom_ru:
 	$(AVRDUDE) $(AD_CMDLINE) -U eeprom:w:eeprom/eeprom_ru.bin:r
-
-eeprom_by:
-	$(AVRDUDE) $(AD_CMDLINE) -U eeprom:w:eeprom/eeprom_by.bin:r
 
 eeprom_ua:
 	$(AVRDUDE) $(AD_CMDLINE) -U eeprom:w:eeprom/eeprom_ua.bin:r
