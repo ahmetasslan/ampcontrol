@@ -5,12 +5,34 @@
 #include "rtc.h"
 #include "alarm.h"
 #include "audio/audio.h"
-#include "display/gdfb.h"
 
+#ifdef _KS0066_16X2_PCF8574
+#define _KS0066
+#endif
+
+#ifdef _KS0066_16X2
+#define _KS0066
+#endif
+
+#if defined(_KS0066)
+#include "display/ks0066.h"
+#define MIN_BRIGHTNESS			KS0066_MIN_BRIGHTNESS
+#define MAX_BRIGHTNESS			KS0066_MAX_BRIGHTNESS
+#define writeString(x)			ks0066WriteString(x)
+#define displayClear()			ks0066Clear()
+#elif defined(_LS020)
+#include "display/ls020.h"
+#define MIN_BRIGHTNESS			LS020_MIN_BRIGHTNESS
+#define MAX_BRIGHTNESS			LS020_MAX_BRIGHTNESS
+#define writeString(x)			ls020WriteString(x)
+#define displayClear()			ls020Clear()
+#else
+#include "display/gdfb.h"
 #define MIN_BRIGHTNESS			GD_MIN_BRIGHTNESS
 #define MAX_BRIGHTNESS			GD_MAX_BRIGHTNESS
 #define writeString(x)			gdWriteString(x)
 #define displayClear()			gdClear()
+#endif
 
 /* Backlight state */
 #define BACKLIGHT_ON			1
@@ -71,6 +93,9 @@ void nextRcCmd(void);
 void switchTestMode(uint8_t index);
 void showRcInfo(void);
 
+#ifdef _TEMPCONTROL
+void showTemp(void);
+#endif
 void showRadio(uint8_t tune);
 
 void showMute(void);

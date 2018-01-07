@@ -107,6 +107,15 @@
 #define ST7920_BCKL         DISP_BCKL
 #define ST7920_BCKL_LINE    DISP_BCKL_LINE
 
+// Ext function options
+enum {
+    USE_DS18B20 = 0,
+    USE_SW_SPI,
+    USE_INPUT_STATUS,
+
+    USE_EXT_END
+};
+
 /* ST7920 port*/
 #define SSD1306_SCK         DISP_STROB
 #define SSD1306_SCK_LINE    DISP_STROB_LINE

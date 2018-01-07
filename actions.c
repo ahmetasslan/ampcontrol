@@ -3,12 +3,18 @@
 #include <util/delay.h>
 #include "display.h"
 #include "tuner/tuner.h"
+#ifdef _TEMPCONTROL
+#include "temp.h"
+#endif
 #include "adc.h"
 #include "alarm.h"
 #ifdef _UARTCONTROL
 #include "uart.h"
 #endif
 #include "pins.h"
+#ifdef _SPISW
+#include "spisw.h"
+#endif
 
 static uint8_t dispMode = MODE_STANDBY;
 static uint8_t dispModePrev = MODE_STANDBY;
@@ -93,7 +99,7 @@ uint8_t getAction(void)
 		break;
 
 	case CMD_BTN_1_LONG:
-		if (dispMode == MODE_TEST)
+		if (dispMode == MODE_TEST || dispMode == MODE_TEMP)
 			action = ACTION_ZERO_DISPLAYTIME;
 		else
 			action = CMD_RC_BRIGHTNESS;
@@ -118,6 +124,9 @@ uint8_t getAction(void)
 
 	case CMD_BTN_12_LONG:
 		action = ACTION_TESTMODE;
+		break;
+	case CMD_BTN_13_LONG:
+		action = ACTION_TEMPMODE;
 		break;
 	default:
 		break;
@@ -152,9 +161,16 @@ uint8_t getAction(void)
 		if (action != ACTION_NEXT_RC_CMD && action != ACTION_ZERO_DISPLAYTIME)
 			action = ACTION_NOACTION;
 	}
-	/* Disable actions except POWERON and TESTMODE in standby mode */
+	/* Disable actions except ZERO_DISPLAY_TIME in temp mode */
+	if (dispMode == MODE_TEMP) {
+		if (action != ACTION_NOACTION)
+			setDisplayTime(DISPLAY_TIME_TEMP);
+		if (action != ACTION_ZERO_DISPLAYTIME)
+			action = ACTION_NOACTION;
+	}
+	/* Disable actions except POWERON, TESTMODE and TEMPMODE in standby mode */
 	if (dispMode == MODE_STANDBY) {
-		if (action != ACTION_EXIT_STANDBY && action != ACTION_TESTMODE)
+		if (action != ACTION_EXIT_STANDBY && action != ACTION_TESTMODE && action != ACTION_TEMPMODE)
 			action = ACTION_NOACTION;
 	}
 	/* Disable most action in time edit mode */
@@ -193,6 +209,9 @@ void handleAction(uint8_t action)
 		PORT(STMU_STBY) |= STMU_STBY_LINE;	/* Power up audio and tuner */
 		setWorkBrightness();
 
+#ifdef _SPISW
+		SPIswSet(aproc.input);
+#endif
 		setInitTimer(INIT_TIMER_START);
 
 		dispMode = MODE_SND_GAIN0 + aproc.input;
@@ -215,6 +234,9 @@ void handleAction(uint8_t action)
 		tunerPowerOff();
 		displayPowerOff();
 
+#ifdef _SPISW
+		SPIswSet(-1);
+#endif
 		PORT(STMU_STBY) &= ~STMU_STBY_LINE;
 
 		setStbyBrightness();
@@ -335,6 +357,9 @@ void handleAction(uint8_t action)
 	case CMD_RC_IN_3:
 	case CMD_RC_IN_4:
 		sndSetInput(action - CMD_RC_IN_0);
+#ifdef _SPISW
+		SPIswSet(aproc.input);
+#endif
 		dispMode = MODE_SND_GAIN0 + aproc.input;
 		setDisplayTime(DISPLAY_TIME_GAIN);
 		tunerSetMute(aproc.mute || aproc.input);
@@ -374,7 +399,15 @@ void handleAction(uint8_t action)
 			break;
 		}
 		break;
+	case ACTION_TEMPMODE:
+		switch (dispMode) {
+		case MODE_STANDBY:
+			dispMode = MODE_TEMP;
 			setWorkBrightness();
+			setDisplayTime(DISPLAY_TIME_TEMP);
+			break;
+		}
+		break;
 	default:
 		if (!aproc.input && tuner.ic) {
 			switch (action) {
@@ -446,6 +479,12 @@ void handleEncoder(int8_t encCnt)
 			break;
 		case MODE_TEST:
 			setDisplayTime(DISPLAY_TIME_TEST);
+			break;
+		case MODE_TEMP:
+#ifdef _TEMPCONTROL
+			changeTempTH(encCnt);
+			setDisplayTime(DISPLAY_TIME_TEMP);
+#endif
 			break;
 		case MODE_TIME_EDIT:
 			rtcChangeTime(encCnt);
@@ -531,6 +570,10 @@ void handleExitDefaultMode(void)
 		case MODE_STANDBY:
 			setStbyBrightness();
 			break;
+		case MODE_TEMP:
+#ifdef _TEMPCONTROL
+			saveTempParams();
+#endif
 		case MODE_TEST:
 			dispMode = MODE_STANDBY;
 			break;
@@ -550,7 +593,7 @@ void handleTimers(void)
 	stbyTimer = getStbyTimer();
 	silenceTimer = getSilenceTimer();
 
-	if (dispMode != MODE_STANDBY && dispMode != MODE_TEST) {
+	if (dispMode != MODE_STANDBY && dispMode != MODE_TEST && dispMode != MODE_TEMP) {
 		if (getSignalLevel() > 5) {
 			enableSilenceTimer();
 			silenceTimer = getSilenceTimer();
@@ -588,6 +631,11 @@ void showScreen(void)
 		break;
 	case MODE_TEST:
 		showRcInfo();
+		break;
+	case MODE_TEMP:
+#ifdef _TEMPCONTROL
+		showTemp();
+#endif
 		break;
 	case MODE_SPECTRUM:
 		showSpectrum();

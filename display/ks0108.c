@@ -7,12 +7,21 @@
 
 static volatile uint8_t pins;
 
+#ifdef _KS0108B
+#define KS0108_SET_CS1(); \
+	PORT(KS0108_CS1) &= ~KS0108_CS1_LINE; \
+	PORT(KS0108_CS2) |= KS0108_CS2_LINE;
+#define KS0108_SET_CS2(); \
+	PORT(KS0108_CS2) &= ~KS0108_CS2_LINE; \
+	PORT(KS0108_CS1) |= KS0108_CS1_LINE;
+#else
 #define KS0108_SET_CS1(); \
 	PORT(KS0108_CS1) |= KS0108_CS1_LINE; \
 	PORT(KS0108_CS2) &= ~KS0108_CS2_LINE;
 #define KS0108_SET_CS2(x); \
 	PORT(KS0108_CS2) |= KS0108_CS2_LINE; \
 	PORT(KS0108_CS1) &= ~KS0108_CS1_LINE;
+#endif
 
 static uint8_t fb[KS0108_COLS * KS0108_CHIPS][KS0108_ROWS];
 static uint8_t _br;

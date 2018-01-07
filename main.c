@@ -11,12 +11,33 @@
 #include "i2c.h"
 #include "display.h"
 #include "tuner/tuner.h"
+#ifdef _TEMPCONTROL
+#include "temp.h"
+#endif
 #include "actions.h"
 #include "pins.h"
+#ifdef _SPISW
+#include "spisw.h"
+#endif
 
 // Hardware initialization
-static void hwInit(void)
+static void hwInit(uint8_t extFunc)
 {
+#ifdef _TEMPCONTROL
+	loadTempParams();
+#endif
+	if (extFunc == USE_DS18B20) {
+#ifdef _TEMPCONTROL
+		ds18x20SearchDevices();
+		tempInit();							// Init temperature control
+		setSensTimer(TEMP_MEASURE_TIME);
+#endif
+	} else {
+#ifdef _SPISW
+		SPIswInitLines(extFunc);
+#endif
+	}
+
 	I2CInit();								// I2C bus
 	displayInit();							// Load params and text labels before fb scan started
 	rcInit();								// IR Remote control
@@ -45,11 +66,22 @@ int main(void)
 {
 	int8_t encCnt = 0;
 	uint8_t action = ACTION_NOACTION;
+	uint8_t extFunc = eeprom_read_byte((uint8_t*)EEPROM_EXT_FUNC);
 
 	// Init hardware
-	hwInit();
+	hwInit(extFunc);
 
 	while (1) {
+#ifdef _TEMPCONTROL
+		// Control temperature
+		if (extFunc == USE_DS18B20) {
+			if (getSensTimer() == 0) {
+				ds18x20Process();
+				setSensTimer(SENSOR_POLL_INTERVAL);
+			}
+			tempControlProcess();
+		}
+#endif
 		// Emulate poweroff if any of timers expired
 		if (getStbyTimer() == 0 || getSilenceTimer() == 0)
 			action = CMD_RC_STBY;

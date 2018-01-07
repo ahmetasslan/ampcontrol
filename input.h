@@ -74,6 +74,7 @@ typedef enum {
 	CMD_BTN_4_LONG,
 	CMD_BTN_5_LONG,
 	CMD_BTN_12_LONG,
+	CMD_BTN_13_LONG,
 
 	CMD_END
 
@@ -90,6 +91,9 @@ typedef enum {
 #define INIT_TIMER_OFF			-1
 #define INIT_TIMER_START		700
 
+#define TEMP_MEASURE_TIME		1
+#define SENSOR_POLL_INTERVAL	5
+
 void rcCodesInit(void);
 void inputInit(void);
 
@@ -102,6 +106,11 @@ uint16_t getEncBuf(void);
 
 void setDisplayTime(uint16_t value);
 uint16_t getDisplayTime(void);
+
+#ifdef _TEMPCONTROL
+uint8_t getSensTimer(void);
+void setSensTimer(uint8_t val);
+#endif
 
 int16_t getStbyTimer(void);
 void setStbyTimer(int16_t val);
