@@ -26,6 +26,9 @@
 #ifdef _RDA580X_AUDIO
 #include "../tuner/rda580x.h"
 #endif
+#ifdef _NIKITIN
+#include "nikitin.h"
+#endif
 
 static const sndGrid grid_0_0_0             PROGMEM = {  0,  0, 0.00 * 8};  // Not implemented
 #if defined(_TDA7439) || defined(_TDA7448) || defined(_PT232X)
@@ -65,6 +68,9 @@ static const sndGrid grid_n12_12_3          PROGMEM = { -4,  4, 3.00 * 8};  // -
 #ifdef _RDA580X_AUDIO
 static const sndGrid grid_0_15_1            PROGMEM = {  0, 15, 1.00 * 8};  // 0..15dB with 1dB step
 #endif
+#ifdef _NIKITIN
+static const sndGrid grid_n63_0_1           PROGMEM = {-63, 0, 1.00 * 8};  // -63..0B with 1dB step
+#endif
 
 sndParam sndPar[MODE_SND_END];
 Audioproc_type aproc;
@@ -90,24 +96,26 @@ void sndInit(void)
         sndPar[i].value = eeprom_read_byte((uint8_t *)EEPROM_VOLUME + i);
     eeprom_read_block(&aproc, (void *)EEPROM_AUDIOPROC, sizeof(Audioproc_type) - 1);
 
-#if   !defined(_TDA7439) && !defined(_TDA731X) && !defined(_TDA7448) && !defined(_PT232X) && !defined(_TEA63X0) && !defined(_PGA2310) && !defined(_RDA580X_AUDIO)
+#if   !defined(_TDA7439) && !defined(_TDA731X) && !defined(_TDA7448) && !defined(_PT232X) && !defined(_TEA63X0) && !defined(_PGA2310) && !defined(_RDA580X_AUDIO) && !defined(_NIKITIN)
     aproc.ic = AUDIOPROC_NO;
-#elif  defined(_TDA7439) && !defined(_TDA731X) && !defined(_TDA7448) && !defined(_PT232X) && !defined(_TEA63X0) && !defined(_PGA2310) && !defined(_RDA580X_AUDIO)
+#elif  defined(_TDA7439) && !defined(_TDA731X) && !defined(_TDA7448) && !defined(_PT232X) && !defined(_TEA63X0) && !defined(_PGA2310) && !defined(_RDA580X_AUDIO) && !defined(_NIKITIN)
     aproc.ic = AUDIOPROC_TDA7439;
-#elif !defined(_TDA7439) &&  defined(_TDA731X) && !defined(_TDA7448) && !defined(_PT232X) && !defined(_TEA63X0) && !defined(_PGA2310) && !defined(_RDA580X_AUDIO)
+#elif !defined(_TDA7439) &&  defined(_TDA731X) && !defined(_TDA7448) && !defined(_PT232X) && !defined(_TEA63X0) && !defined(_PGA2310) && !defined(_RDA580X_AUDIO) && !defined(_NIKITIN)
     if (aproc.ic < AUDIOPROC_TDA7312 || aproc.ic >= AUDIOPROC_PT2314)
         aproc.ic = AUDIOPROC_TDA7313;
-#elif !defined(_TDA7439) && !defined(_TDA731X) &&  defined(_TDA7448) && !defined(_PT232X) && !defined(_TEA63X0) && !defined(_PGA2310) && !defined(_RDA580X_AUDIO)
+#elif !defined(_TDA7439) && !defined(_TDA731X) &&  defined(_TDA7448) && !defined(_PT232X) && !defined(_TEA63X0) && !defined(_PGA2310) && !defined(_RDA580X_AUDIO) && !defined(_NIKITIN)
     aproc.ic = AUDIOPROC_TDA7448;
-#elif !defined(_TDA7439) && !defined(_TDA731X) && !defined(_TDA7448) &&  defined(_PT232X) && !defined(_TEA63X0) && !defined(_PGA2310) && !defined(_RDA580X_AUDIO)
+#elif !defined(_TDA7439) && !defined(_TDA731X) && !defined(_TDA7448) &&  defined(_PT232X) && !defined(_TEA63X0) && !defined(_PGA2310) && !defined(_RDA580X_AUDIO) && !defined(_NIKITIN)
     aproc.ic = AUDIOPROC_PT232X;
-#elif !defined(_TDA7439) && !defined(_TDA731X) && !defined(_TDA7448) && !defined(_PT232X) &&  defined(_TEA63X0) && !defined(_PGA2310) && !defined(_RDA580X_AUDIO)
+#elif !defined(_TDA7439) && !defined(_TDA731X) && !defined(_TDA7448) && !defined(_PT232X) &&  defined(_TEA63X0) && !defined(_PGA2310) && !defined(_RDA580X_AUDIO) && !defined(_NIKITIN)
     if (aproc.ic != AUDIOPROC_TEA6330)
         aproc.ic = AUDIOPROC_TEA6300;
-#elif !defined(_TDA7439) && !defined(_TDA731X) && !defined(_TDA7448) && !defined(_PT232X) && !defined(_TEA63X0) && defined(_PGA2310) && !defined(_RDA580X_AUDIO)
+#elif !defined(_TDA7439) && !defined(_TDA731X) && !defined(_TDA7448) && !defined(_PT232X) && !defined(_TEA63X0) && defined(_PGA2310) && !defined(_RDA580X_AUDIO) && !defined(_NIKITIN)
     aproc.ic = AUDIOPROC_PGA2310;
-#elif !defined(_TDA7439) && !defined(_TDA731X) && !defined(_TDA7448) && !defined(_PT232X) && !defined(_TEA63X0) && !defined(_PGA2310) && defined(_RDA580X_AUDIO)
+#elif !defined(_TDA7439) && !defined(_TDA731X) && !defined(_TDA7448) && !defined(_PT232X) && !defined(_TEA63X0) && !defined(_PGA2310) && defined(_RDA580X_AUDIO) && !defined(_NIKITIN)
     aproc.ic = AUDIOPROC_RDA580X;
+#elif !defined(_TDA7439) && !defined(_TDA731X) && !defined(_TDA7448) && !defined(_PT232X) && !defined(_TEA63X0) && !defined(_PGA2310) && !defined(_RDA580X_AUDIO) && defined(_NIKITIN)
+    aproc.ic = AUDIOPROC_NIKITIN;
 #else
     if (aproc.ic >= AUDIOPROC_END)
         aproc.ic = AUDIOPROC_NO;
@@ -116,6 +124,10 @@ void sndInit(void)
 #ifdef _PGA2310
     if (aproc.ic == AUDIOPROC_PGA2310)
         pga2310Init();
+#endif
+#ifdef _NIKITIN
+    if (aproc.ic == AUDIOPROC_NIKITIN)
+        nikitinInit();
 #endif
 
     // Init grid and functions with empty values
@@ -174,6 +186,9 @@ void sndInit(void)
     case AUDIOPROC_PGA2310:
         inCnt = PGA2310_IN_CNT;
         break;
+#endif
+#ifdef _NIKITIN
+        inCnt = NIKITIN_IN_CNT;
 #endif
     default:
         inCnt = 1;
@@ -330,6 +345,14 @@ void sndInit(void)
         sndPar[MODE_SND_VOLUME].set = rda580xAudioSetVolume;
         break;
 #endif
+#ifdef _NIKITIN
+    case AUDIOPROC_NIKITIN:
+        sndPar[MODE_SND_VOLUME].grid = &grid_n63_0_1;
+        sndPar[MODE_SND_VOLUME].set = nikitinSetSpeakers;
+        sndPar[MODE_SND_BALANCE].grid = &grid_n15_15_1;
+        sndPar[MODE_SND_BALANCE].set = nikitinSetSpeakers;
+        break;
+#endif
     default:
         break;
     }
@@ -427,6 +450,11 @@ void sndSetMute(uint8_t value)
 #ifdef _RDA580X_AUDIO
     case AUDIOPROC_RDA580X:
         rda580xSetMute(value);
+        break;
+#endif
+#ifdef _NIKITIN
+    case AUDIOPROC_NIKITIN:
+        pga2310SetMute();
         break;
 #endif
     default:

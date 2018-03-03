@@ -3,6 +3,8 @@ Makefile
 
 audio/audio.c
 audio/audio.h
+audio/nikitin.c
+audio/nikitin.h
 audio/pga2310.c
 audio/pga2310.h
 audio/pt232x.c

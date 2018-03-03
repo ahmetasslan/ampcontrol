@@ -8,7 +8,7 @@ TUNER_LIST = TEA5767 RDA580X TUX032
 FEATURE_LIST = UARTCONTROL RDS
 
 ifeq ($(MCU), atmega32)
-APROC_LIST += PGA2310
+APROC_LIST += PGA2310 NIKITIN
 TUNER_LIST += LM7001 LC72131
 FEATURE_LIST += TEMPCONTROL
 endif
@@ -58,6 +58,10 @@ ifeq "$(findstring TEA63X0, $(APROC_LIST))" "TEA63X0"
 endif
 ifeq "$(findstring PGA2310, $(APROC_LIST))" "PGA2310"
   SRCS += audio/pga2310.c
+  SOFTWARE_SPI = YES
+endif
+ifeq "$(findstring NIKITIN, $(APROC_LIST))" "NIKITIN"
+  SRCS += audio/nikitin.c
   SOFTWARE_SPI = YES
 endif
 DEFINES += $(addprefix -D_, $(APROC_LIST))
