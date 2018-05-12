@@ -148,6 +148,13 @@ uint8_t getAction()
         action = ACTION_TEMPMODE;
         break;
 #endif
+    case CMD_BTN_IN_D0:
+    case CMD_BTN_IN_D1:
+    case CMD_BTN_IN_D2:
+    case CMD_BTN_IN_D3:
+        sndSetInput(cmd - CMD_BTN_IN_D0);
+        action = ACTION_EXIT_STANDBY;
+        break;
     default:
         break;
     }

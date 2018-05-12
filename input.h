@@ -76,6 +76,11 @@ typedef enum {
     CMD_BTN_12_LONG,
     CMD_BTN_13_LONG,
 
+    CMD_BTN_IN_D0,
+    CMD_BTN_IN_D1,
+    CMD_BTN_IN_D2,
+    CMD_BTN_IN_D3,
+
     CMD_END
 
 } CmdID;

@@ -15,7 +15,7 @@ static uint8_t silenceTime;
 
 // Previous state
 static uint8_t encPrev = ENC_NO;
-static uint8_t btnPrev = BTN_NO;
+static uint16_t btnPrev = BTN_NO;
 
 static uint16_t displayTime = 0;                    // Display mode timer
 static int16_t initTimer = INIT_TIMER_OFF;          // Init timer
@@ -44,7 +44,7 @@ static CmdID rcCmdIndex(uint8_t rcCmd)
     return CMD_RC_END;
 }
 
-static uint8_t getPins()
+static uint16_t getPins()
 {
 #ifdef _atmega32
     uint8_t pins = BTN_NO;
@@ -65,7 +65,7 @@ static uint8_t getPins()
     if (!READ(ENCODER_B))
         pins |= ENC_B;
 
-    return pins;
+    return pins | (gdGetPins() << 8);
 #else
     return gdGetPins();
 #endif
@@ -136,8 +136,8 @@ ISR (TIMER2_COMPA_vect)
     static int16_t btnCnt = 0;                      // Buttons press duration value
 
     // Current state
-    uint8_t btnNow = getPins();
-    uint8_t encNow = btnNow;
+    uint16_t btnNow = getPins();
+    uint8_t encNow = btnNow & 0xFF;
 
     // If encoder event has happened, inc/dec encoder counter
     if (encRes) {
@@ -186,6 +186,18 @@ ISR (TIMER2_COMPA_vect)
                     cmdBuf = CMD_BTN_13_LONG;
                     break;
 #endif
+                case BTN_D0 << 8:
+                    cmdBuf = CMD_BTN_IN_D0;
+                    break;
+                case BTN_D1 << 8:
+                    cmdBuf = CMD_BTN_IN_D1;
+                    break;
+                case BTN_D2 << 8:
+                    cmdBuf = CMD_BTN_IN_D2;
+                    break;
+                case BTN_D3 << 8:
+                    cmdBuf = CMD_BTN_IN_D3;
+                    break;
                 }
             } else if (!encRes) {
                 if (btnCnt == LONG_PRESS + AUTOREPEAT) {
